@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import WebSocket from 'ws';
 import fs from 'fs';
+import path from 'path';
 import dotenv from 'dotenv';
 import fastifyFormBody from '@fastify/formbody';
 import fastifyWs from '@fastify/websocket';
@@ -23,7 +24,19 @@ fastify.register(fastifyFormBody);
 fastify.register(fastifyWs);
 
 // Constants
-const SYSTEM_MESSAGE = 'You are an AI receptionist for Barts Automotive. Your job is to politely engage with the client and obtain their name, availability, and service/work required. Ask one question at a time. Do not ask for other contact information, and do not check availability, assume we are free. Ensure the conversation remains friendly and professional, and guide the user to provide these details naturally. If necessary, ask follow-up questions to gather the required information.';
+const filePath = path.join(process.cwd(), 'menus', 'hanami', 'output_lunch.txt');
+
+// Read the content of the text file
+let menuContent;
+try {
+    menuContent = fs.readFileSync(filePath, 'utf-8');
+} catch (err) {
+    console.error("Error reading the file:", err);
+    menuContent = "Error loading the menu.";
+}
+
+// Define the system message
+const SYSTEM_MESSAGE = `You are a receptionist at a Chinese restaurant taking orders. Be resourceful and efficient. Below are the extracted content from the menu. Note that there can be some errors in the extracted text. Make sure that you know what you are talking about when answering to prompts. At the end, you should repeat the order to the client and confirm the price (with the 15% tax), whether the order is going to be picked up or delivered and the corresponding time.\n\n${menuContent}`;
 const VOICE = 'alloy';
 const PORT = process.env.PORT || 5050;
 const WEBHOOK_URL = "<input your webhook URL here>";
@@ -55,7 +68,7 @@ fastify.all('/incoming-call', async (request, reply) => {
 
     const twimlResponse = `<?xml version="1.0" encoding="UTF-8"?>
                           <Response>
-                              <Say>Hi, you have called Bart's Automative Centre. How can we help?</Say>
+                              <Say>Hi, you have called Hanami Sushi. How can we help?</Say>
                               <Connect>
                                   <Stream url="wss://${request.headers.host}/media-stream" />
                               </Connect>

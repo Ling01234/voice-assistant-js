@@ -1,3 +1,9 @@
+*.png
+*.jpg
+recordings/
+*DS_Store
+*.ipynb
+
 # Logs
 logs
 *.log
